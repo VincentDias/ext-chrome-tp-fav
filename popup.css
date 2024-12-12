@@ -1,0 +1,19 @@
+body {
+  font-family: Arial, sans-serif;
+  padding: 10px;
+}
+
+button {
+  background-color: #0078d4;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+#status {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #555;
+}

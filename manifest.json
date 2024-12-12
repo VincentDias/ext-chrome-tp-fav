@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "Osef",
+  "version": "1.0",
+  "description": "todo",
+  "permissions": ["activeTab", "bookmarks"],
+  "icons": {
+    "48": "icons/hello_extensions.png"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "48": "icons/hello_extensions.png"
+    },
+    "default_title": "Mon Extension"
+  }
+}
