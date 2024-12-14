@@ -3,28 +3,25 @@ document.getElementById("reorganise").addEventListener("click", async () => {
   status.textContent = "Récupération des favoris...";
 
   try {
-    console.log("Étape 1: Récupération des favoris.");
-
     // Récupérer les favoris du navigateur
     chrome.bookmarks.getTree(async (bookmarks) => {
-      console.log("Étape 2: Analyse des favoris.");
       status.textContent = "Analyse des favoris...";
 
       const links = recupFavoris(bookmarks);
 
-      const requestBody = {
-        model: "llama3.2",
-        prompt: "test", // Le prompt de l'utilisateur
-        stream: false,
-      };
-
       console.info("Passage du body de la requête au background.js");
-      chrome.runtime.sendMessage(requestBody);
-
-      // console.log("Étape 4: Réorganisation des favoris.");
-      // Réorganisation dans Chrome
-      // organizeBookmarks(grouped);
-      // status.textContent = "Favoris réorganisés !";
+      chrome.runtime.sendMessage(
+        { type: "ask-llama", model: "llama3.2" },
+        (response) => {
+          if (response.error) {
+            status.textContent = `Erreur : ${response.error}`;
+          } else {
+            status.textContent = `Réponse du LLM : ${response.reply}`;
+            // Réorganisation dans Chrome
+            // organizeBookmarks(grouped);
+          }
+        }
+      );
     });
   } catch (error) {
     console.error("Erreur:", error);
