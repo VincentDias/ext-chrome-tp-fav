@@ -9,9 +9,9 @@ document.getElementById("reorganise").addEventListener("click", async () => {
 
       const links = recupFavoris(bookmarks);
 
-      console.info("Passage du body de la requête au background.js");
+      // Transmission des liens à l'API de Llama
       chrome.runtime.sendMessage(
-        { type: "ask-llama", model: "llama3.2" },
+        { type: "ask-llama", model: "llama3.2", prompt: links },
         (response) => {
           if (response.error) {
             status.textContent = `Erreur : ${response.error}`;
@@ -29,6 +29,7 @@ document.getElementById("reorganise").addEventListener("click", async () => {
   }
 });
 
+// Méthode de récupération de l'ensemble des favoris
 function recupFavoris(bookmarkTree) {
   const links = [];
   function traverseTree(node) {
@@ -39,6 +40,5 @@ function recupFavoris(bookmarkTree) {
     }
   }
   traverseTree(bookmarkTree[0]);
-  console.log("Favoris extraits:", links);
   return links;
 }
