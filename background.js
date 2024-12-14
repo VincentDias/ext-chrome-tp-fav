@@ -3,34 +3,33 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.model === "llama3.2") {
       console.log("Envoi du prompt au modèle llama3.2");
 
-      // Le contenu du body de la requête HTTP
-      const requestBody = {
-        model: "llama3.2",
-        prompt: "coucou",
-        stream: false,
-      };
-
       // Envoi de la requête POST
-      envoiRequetePost(requestBody, sendResponse);
+      envoiRequetePost(sendResponse);
       // Indiquer que la réponse sera envoyée de manière asynchrone
       return true; // Cela permet à `sendResponse` d'être appelé après l'appel asynchrone
     }
   }
 });
 
-function envoiRequetePost(requestBody, sendResponse) {
-  fetch("http://127.0.0.1:11434/api/generate", {
+function envoiRequetePost(sendResponse) {
+  // URL de l'API
+  const url = "http://localhost:11434/api/generate";
+  // Le contenu du body de la requête HTTP
+  fetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Accept: "application/json",
     },
-    body: JSON.stringify({ requestBody }),
+    // Le contenu du body de la requête HTTP
+    body: JSON.stringify({
+      model: "llama3.2",
+      prompt: "bonjour",
+      stream: false,
+    }),
   })
     .then((response) => {
       // Vérifiez si la réponse est valide
       if (!response.ok) {
-        console.log(response.text());
         throw new Error(`Erreur HTTP : ${response.status}`);
       }
 
@@ -40,7 +39,7 @@ function envoiRequetePost(requestBody, sendResponse) {
       // Essayez de convertir la réponse en JSON après l'avoir obtenue sous forme de texte
       try {
         const data = JSON.parse(text);
-        console.log("Réponse de l'API :", data);
+        console.log("Réponse de l'API:", data);
         if (data.completion) {
           sendResponse({ reply: data.completion });
         } else {
