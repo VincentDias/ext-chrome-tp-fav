@@ -3,7 +3,8 @@
   "name": "Osef",
   "version": "1.0",
   "description": "todo",
-  "permissions": ["activeTab", "bookmarks"],
+  "permissions": ["activeTab", "storage", "bookmarks"],
+  "host_permissions": ["*://*/*"],
   "icons": {
     "48": "icons/hello_extensions.png"
   },
