@@ -1,8 +1,9 @@
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === "ask-llama") {
     if (message.model === "llama3.2") {
-      console.log("Envoi du prompt au modèle...");
+      console.log("Envoi du prompt au modèle llama3.2");
 
+      // Le contenu du body de la requête HTTP
       const requestBody = {
         model: "llama3.2",
         prompt: "coucou",
@@ -18,17 +19,18 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 });
 
 function envoiRequetePost(requestBody, sendResponse) {
-  console.log(requestBody);
-  fetch("http://localhost:11434/api/generate", {
+  fetch("http://127.0.0.1:11434/api/generate", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      Accept: "application/json",
     },
     body: JSON.stringify({ requestBody }),
   })
     .then((response) => {
       // Vérifiez si la réponse est valide
       if (!response.ok) {
+        console.log(response.text());
         throw new Error(`Erreur HTTP : ${response.status}`);
       }
 
