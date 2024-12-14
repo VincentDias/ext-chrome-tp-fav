@@ -1,6 +1,6 @@
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   console.log(message);
-  if (message.type === "ask-llama") {
+  if (message.type === "reorganise") {
     const prompt = message.input;
     console.log("test");
 
@@ -10,7 +10,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 });
 
 function envoiRequetePost() {
-  fetch("http://127.0.0.1:11434/api/generate", {
+  fetch("http://localhost:11434/api/generate", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
