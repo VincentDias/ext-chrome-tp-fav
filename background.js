@@ -9,7 +9,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       const liensJson = JSON.stringify(liens);
 
       // Envoi de la requête POST
-      envoiRequetePost(generePrompt(liensJson), sendResponse);
+      envoiRequete(generePrompt(liensJson), sendResponse);
 
       return true;
     }
@@ -18,14 +18,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 function generePrompt(jsonString) {
   let liens = jsonString;
-  // récupération du prompt de prompt.js et ajoute les liens
+  // récupération du prompt et ajout les liens pour remonter les catégories parentes
   return prompt + liens;
 }
 
-function envoiRequetePost(jsonString, sendResponse) {
+function envoiRequete(requete, sendResponse) {
   // connexion à l'API
-  const url = "http://localhost:11434/api/generate";
-  fetch(url, {
+  fetch("http://localhost:11434/api/generate", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -33,7 +32,7 @@ function envoiRequetePost(jsonString, sendResponse) {
     // Le contenu du body de la requête HTTP
     body: JSON.stringify({
       model: "llama3.2",
-      prompt: jsonString,
+      prompt: requete,
       stream: false,
     }),
   })
@@ -45,11 +44,14 @@ function envoiRequetePost(jsonString, sendResponse) {
       // Traitez la réponse d'abord comme texte
       return response.text();
     })
+
     .then((text) => {
       // Essaie de convertir la réponse en JSON après l'avoir obtenue sous forme de texte
       try {
         const reponseLlm = JSON.parse(text);
         if (reponseLlm.response) {
+          console.log(extractCategorie(reponseLlm.response));
+
           sendResponse({ reply: reponseLlm.response });
         } else {
           sendResponse({ error: "Aucune réponse valide reçue du modèle." });
@@ -67,18 +69,29 @@ function envoiRequetePost(jsonString, sendResponse) {
     });
 }
 
-function recupereJson(retourLlm) {
-  try {
-    // Extraire la partie JSON avec une regex
-    const jsonMatch = retourLlm.match(/```json([\s\S]*?)```/);
-    if (jsonMatch) {
-      const jsonString = jsonMatch[1].trim(); // La chaîne JSON brute
-      const jsonObject = JSON.parse(jsonString); // Conversion en objet JS
-      console.log("jsonObject " + jsonObject);
-    } else {
-      console.error("Aucun JSON détecté.");
+function extractCategorie(text) {
+  const categories = {};
+
+  // Diviser le texte en lignes pour un traitement ligne par ligne
+  const lines = text.split("\n");
+  let currentCategory = null;
+
+  lines.forEach((line) => {
+    line = line.trim();
+    // Détecter une nouvelle catégorie (ex: "1. **Nom de la catégorie** :")
+    const categoryMatch = line.match(/^\d+\.\s\*\*(.*?)\*\*\s*:/);
+
+    if (categoryMatch) {
+      // Extraction du nom de la catégorie
+      currentCategory = categoryMatch[1];
+      // Extraire le nom de la catégorie
+      categories[currentCategory] = [];
+    } else if (currentCategory && line.startsWith("*")) {
+      // Si on est dans une catégorie et que la ligne commence par "*", c'est un lien
+      const link = line.replace(/^\*\s*/, ""); // Enlever la puce "* "
+      // Ajouter le lien dans la catégorie
+      categories[currentCategory].push(link);
     }
-  } catch (error) {
-    console.error("Erreur lors du traitement :", error);
-  }
+  });
+  return categories;
 }
